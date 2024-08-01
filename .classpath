@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="openlauncherlib-3.0.5.jar"/>
+	<classpathentry kind="lib" path="swinger-1.0.0-BETA.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Pierre-Olivier/Desktop/Librairies/gson-2.10.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Pierre-Olivier/Desktop/Librairies/WyLog.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
