@@ -41,7 +41,7 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 	private Image passwordFieldImage = Swinger.getResource("pwd_tf.png");
 	private Image emptyFieldImage = Swinger.getResource("empty_tf.png");
 
-	private JTextFieldLimit usernameField = new JTextFieldLimit(14);
+	private JTextFieldLimit usernameField = new JTextFieldLimit(16);
 	private JPasswordField passwordField = new JPasswordField();
 
 	private STexturedButton playButton = new STexturedButton(Swinger.getResource("play.png"), Swinger.getResource("play_hover.png"));
@@ -230,6 +230,7 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 					char[] passwordChars = LoginPanel.this.passwordField.getPassword();
 					auth = LoginPanel.this.frame.getAuth().auth(LoginPanel.this.usernameField.getText(), new String(passwordChars));
 				} catch (IOException e) {
+					e.printStackTrace();
 					LoginPanel.this.setMessage(e.getMessage(), Color.RED);
 					LoginPanel.this.setFieldEnabled(true);
 					return;
@@ -244,6 +245,7 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 				try {
 					LoginPanel.this.frame.getUpdate().update();
 				} catch (Exception e) {
+					e.printStackTrace();
 					LoginPanel.this.setMessage("Impossible de mettre à jour : " + e.getMessage(), Color.RED);
 					LoginPanel.this.setFieldEnabled(true);
 					LoginPanel.this.frame.getUpdate().interrupt();
@@ -255,6 +257,7 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 				try {
 					LoginPanel.this.frame.getLaunch().launch(auth);
 				} catch (LaunchException | InterruptedException e) {
+					e.printStackTrace();
 					LoginPanel.this.setMessage(e.getMessage(), Color.RED);
 					LoginPanel.this.setFieldEnabled(true);
 					return;
