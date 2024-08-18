@@ -12,6 +12,7 @@ import fr.koora.plutonia.launcher.workers.LaunchWorker;
 import fr.koora.plutonia.launcher.workers.UpdateWorker;
 import fr.theshark34.swinger.Swinger;
 import fr.theshark34.swinger.util.WindowMover;
+import lombok.Getter;
 
 public class Frame extends JFrame {
 
@@ -47,11 +48,8 @@ public class Frame extends JFrame {
 		return this.updateWorker;
 	}
 
-	private LoginPanel loginPanel;
-
-	public LoginPanel getPanel() {
-		return this.loginPanel;
-	}
+	@Getter
+	private LoginPanel panel;
 
 	public Frame() {
 		System.setProperty("apple.awt.transparentTitleBar", "true");
@@ -65,7 +63,7 @@ public class Frame extends JFrame {
 		this.setUndecorated(true);
 		this.setBackground(Swinger.TRANSPARENT);
 		this.setOpacity(0f);
-		this.setContentPane(this.loginPanel = new LoginPanel(this));
+		this.setContentPane(this.panel = new LoginPanel(this));
 
 		WindowMover mover = new WindowMover(this);
 		this.addMouseListener(mover);

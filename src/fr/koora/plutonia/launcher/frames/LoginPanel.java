@@ -1,16 +1,22 @@
 package fr.koora.plutonia.launcher.frames;
 
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Base64;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -21,15 +27,17 @@ import fr.koora.plutonia.launcher.frames.textfields.JTextFieldLimit;
 import fr.koora.plutonia.launcher.listeners.SimplifiedDocumentListener;
 import fr.koora.plutonia.launcher.listeners.SimplifiedFocusListener;
 import fr.koora.plutonia.launcher.managers.SettingsManager;
-import fr.koora.plutonia.launcher.utils.JavaVersionUtil;
+import fr.koora.plutonia.launcher.utils.JavaUtils;
 import fr.theshark34.openlauncherlib.LaunchException;
 import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
 import fr.theshark34.openlauncherlib.util.Saver;
+import fr.theshark34.openlauncherlib.util.ramselector.RamSelector;
 import fr.theshark34.swinger.Swinger;
 import fr.theshark34.swinger.event.SwingerEvent;
 import fr.theshark34.swinger.event.SwingerEventListener;
 import fr.theshark34.swinger.textured.STexturedButton;
 import fr.theshark34.swinger.textured.STexturedProgressBar;
+import lombok.Getter;
 
 public class LoginPanel extends JPanel implements SwingerEventListener {
 
@@ -37,44 +45,65 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 
 	private Image backgroundImage = Swinger.getResource("background.png");
 
-	private Image usernameFieldImage = Swinger.getResource("user_tf.png");
-	private Image passwordFieldImage = Swinger.getResource("pwd_tf.png");
-	private Image emptyFieldImage = Swinger.getResource("empty_tf.png");
+	private Image usernameFieldImage = Swinger.getResource("field_username.png");
+	private Image passwordFieldImage = Swinger.getResource("field_password.png");
+	private Image emptyFieldImage = Swinger.getResource("field_empty.png");
 
 	private JTextFieldLimit usernameField = new JTextFieldLimit(16);
 	private JPasswordField passwordField = new JPasswordField();
 
-	private STexturedButton playButton = new STexturedButton(Swinger.getResource("play.png"), Swinger.getResource("play_hover.png"));
-	private STexturedButton quitButton = new STexturedButton(Swinger.getResource("quit.png"), Swinger.getResource("quit_hover.png"));
+	private STexturedButton playButton = new STexturedButton(
+		Swinger.getResource("btn_play.png"),
+		Swinger.getResource("btn_play_hover.png")
+	);
 
-	private STexturedProgressBar progressBar = new STexturedProgressBar(Swinger.getResource("progressbar.png"), Swinger.getResource("progressbar_full.png"));
+	private STexturedButton settingsButton = new STexturedButton(
+		Swinger.getResource("btn_settings.png"),
+		Swinger.getResource("btn_settings_hover.png")
+	);
+
+	private STexturedButton quitButton = new STexturedButton(
+		Swinger.getResource("btn_quit.png"),
+		Swinger.getResource("btn_quit_hover.png")
+	);
+
+	@Getter
+	private STexturedProgressBar progressBar = new STexturedProgressBar(
+		Swinger.getResource("progressbar.png"),
+		Swinger.getResource("progressbar_full.png")
+	);
 
 	private Saver saver = new Saver(new File(SettingsManager.GAME_INFOS.getGameDir(), "credentials.yml"));
 
-	public STexturedProgressBar getProgressBar() {
-		return this.progressBar;
-	}
+	@Getter
+	private RamSelector ramSelector = new RamSelector(new File(SettingsManager.GAME_INFOS.getGameDir(), "launcher" + File.separator + "options.yml"));
 
 	private Frame frame;
-
 	private Timer timer;
+
+	@Getter
+	private Font font;
 
 	public LoginPanel(Frame frame) {
 		this.frame = frame;
 
 		this.setLayout(null);
 
-		// Username field
-		this.usernameField.setBounds(181, 284, 400, 54);
-		this.usernameField.setOpaque(false);
-		this.usernameField.setBorder(null);
+		// Init options + font
+		this.ramSelector.setFrameClass(RamSelectorPanel.class);
 
 		try {
-			Font font = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream("/fr/koora/plutonia/launcher/resources/lemonmilk.otf")).deriveFont(JavaVersionUtil.getJavaVersion() > 8 ? 23.0f : 12.0f);
-			this.usernameField.setFont(font);
-		} catch (FontFormatException | IOException e) {
-			e.printStackTrace();
-		}
+			this.font = Font
+				.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream("/fr/koora/plutonia/launcher/resources/lemonmilk.otf"))
+				.deriveFont(JavaUtils.getJavaVersion() > 8 ? 23.0f : 12.0f)
+			;
+		} catch (FontFormatException | IOException e) {}
+
+		// Username field
+		this.usernameField.setBounds(179, 284, 400, 54);
+		this.usernameField.setOpaque(false);
+		this.usernameField.setBorder(null);
+		this.usernameField.setFont(this.font);
 
 		String savedUsername = this.saver.get("username") == null ? "" : this.saver.get("username");
 		this.usernameField.setText(savedUsername);
@@ -99,8 +128,7 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 		this.add(this.usernameField);
 
 		// Password field
-
-		this.passwordField.setBounds(181, 374, 400, 54);
+		this.passwordField.setBounds(179, 374, 400, 54);
 		this.passwordField.setOpaque(false);
 		this.passwordField.setBorder(null);
 		this.passwordField.setFont(this.passwordField.getFont().deriveFont(20f));
@@ -134,32 +162,42 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 			}
 		});
 
-		this.add(passwordField);
+		this.add(this.passwordField);
 
 		// Play button
-
-		this.playButton.setBounds(246, 550);
+		this.playButton.setBounds(249, 550);
 		this.playButton.setTextureDisabled(this.playButton.getTextureHover());
 		this.playButton.addEventListener(this);
-
 		this.add(this.playButton);
 
-		// Quit button
+		// Settings button
+		this.settingsButton.setBounds(513, 555);
+		this.settingsButton.setTextureDisabled(this.settingsButton.getTextureHover());
+		this.settingsButton.addEventListener(this);
+		this.add(this.settingsButton);
 
+		// Quit button
 		this.quitButton.setBounds(637, 113);
 		this.quitButton.addEventListener(this);
-
 		this.add(this.quitButton);
 
 		// Progress bar
-
 		this.progressBar.setStringPainted(true);
-		this.progressBar.setFont(this.usernameField.getFont().deriveFont(JavaVersionUtil.getJavaVersion() > 8 ? 13.5f : 7.0f));
-		this.progressBar.setBounds(150, 670, 449, 28);
-
+		this.progressBar.setFont(this.usernameField.getFont().deriveFont(JavaUtils.getJavaVersion() > 8 ? 13.5f : 7.0f));
+		this.progressBar.setBounds(154, 670, 449, 28);
 		this.add(this.progressBar);
 
-		if (JavaVersionUtil.getJavaVersion() <= 8) {
+		// Message label
+		this.messageLabel = new JLabel(SettingsManager.HTML_BASE_TEXT);
+		this.messageLabel.setFont(this.getFont().deriveFont(16.0F));
+		this.messageLabel.setForeground(Color.GRAY);
+		this.messageLabel.setBounds(228, 610, 302, 30);
+		this.messageLabel.setCursor(Cursor.getDefaultCursor());
+		this.messageLabel.addMouseListener(new LinkMouseAdapter());
+		this.add(this.messageLabel);
+
+		// Check java version
+		if (JavaUtils.getJavaVersion() <= 8) {
 			this.setMessage("Veuillez mettre à jour votre version de Java.", Color.RED);
 
 			this.timer = new Timer(5000, new ActionListener() {
@@ -169,11 +207,13 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 				}
 			});
 
-			timer.setRepeats(false);
-			timer.start();
+			this.timer.setRepeats(false);
+			this.timer.start();
 		} else
 			this.setMessage("Veuillez entrer vos identifiants.", Color.WHITE);
 	}
+
+	private JLabel messageLabel;
 
 	private Image tempUserImage = this.usernameFieldImage;
 	private Image tempPassImage = this.passwordFieldImage;
@@ -198,6 +238,11 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 	public void onEvent(SwingerEvent event) {
 		if (event.getSource() == this.playButton) {
 			this.play();
+			return;
+		}
+
+		if (event.getSource() == this.settingsButton) {
+			ramSelector.display();
 			return;
 		}
 
@@ -274,13 +319,37 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 
 		Swinger.drawFullsizedImage(graphics, this, this.backgroundImage);
 
-		graphics.drawImage(this.tempUserImage, 172, 275, 417, 72, this);
-		graphics.drawImage(this.tempPassImage, 172, 365, 417, 72, this);
+		graphics.drawImage(this.tempUserImage, 171, 275, 417, 72, this);
+		graphics.drawImage(this.tempPassImage, 171, 365, 417, 72, this);
 	}
 
 	@Override
 	public boolean isOpaque() {
 		return false;
+	}
+
+	private class LinkMouseAdapter extends MouseAdapter {
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			LoginPanel.this.messageLabel.setText(SettingsManager.HTML_HOVERED_TEXT);
+			LoginPanel.this.messageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			LoginPanel.this.messageLabel.setText(SettingsManager.HTML_BASE_TEXT);
+			LoginPanel.this.messageLabel.setCursor(Cursor.getDefaultCursor());
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			try {
+				Desktop.getDesktop().browse(new URI("https://plutonia-mc.fr/user/login"));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 }

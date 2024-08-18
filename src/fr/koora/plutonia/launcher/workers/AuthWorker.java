@@ -3,6 +3,7 @@ package fr.koora.plutonia.launcher.workers;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -18,44 +19,45 @@ import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
 public class AuthWorker {
 
 	public AuthInfos auth(String username, String password) throws IOException {
-		return this.auth(username, password, "");
+		return auth(username, password, "");
 	}
-	
+
 	private AuthInfos auth(String username, String password, String tfaCode) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(SettingsManager.AUTH_URL).openConnection();
-
 		conn.setRequestMethod("POST");
 		conn.setDoOutput(true);
 
 		String encodedPassword = URLEncoder.encode(password, "UTF-8");
+		String postData = "username=" + username + "&password=" + encodedPassword + (!tfaCode.isEmpty() ? "&tfa=" + tfaCode : "");
 
-		conn.getOutputStream().write(("username=" + username + "&password=" + encodedPassword + (!tfaCode.isEmpty() ? "&tfa=" + tfaCode : "")).getBytes("UTF-8"));
+		try (OutputStream outputStream = conn.getOutputStream()) {
+			outputStream.write(postData.getBytes("UTF-8"));
+		}
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+		JsonObject response;
 
-		JsonObject jsonObject = new Gson().fromJson(reader.readLine(), JsonObject.class);
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+			response = new Gson().fromJson(reader.readLine(), JsonObject.class);
+		}
 
-		reader.close();
-
-		String status = jsonObject.get("status").getAsString();
+		String status = response.get("status").getAsString();
 
 		if (status.equals("200")) {
-			String session = jsonObject.get("session").getAsString();
-			String uuid = jsonObject.get("uuid").getAsString();
-
+			String session = response.get("session").getAsString();
+			String uuid = response.get("uuid").getAsString();
 			return new AuthInfos(username, session, uuid);
 		}
 
 		if (status.equals("400")) {
 			String requestedCode = JOptionPane.showInputDialog(null, "Veuillez saisir votre code d'authentification (2FA) :", "Double authentification", JOptionPane.QUESTION_MESSAGE);
 
-			if (requestedCode == null || requestedCode.isEmpty())
+			if (requestedCode == null || requestedCode.isEmpty()) {
 				throw new IOException("Votre code est vide, veuillez le vérifier.");
+			}
 
-			return new AuthWorker().auth(username, password, requestedCode);
+			return auth(username, password, requestedCode);
 		}
 
-		throw new IOException(jsonObject.get("message").getAsString());
+		throw new IOException(response.get("message").getAsString());
 	}
-
 }

@@ -34,4 +34,7 @@ public class SettingsManager {
 	public static String AUTH_URL = "https://api.plutonia-mc.fr/auth";
 	public static String UPDATE_URL = "https://launcher.plutonia-mc.fr/";
 
+	public static final String HTML_BASE_TEXT = "<html><center>Mot de passe oublié <span style='color:orange;'>ou</span> pas encore inscrit ?</center></html>";
+	public static final String HTML_HOVERED_TEXT = "<html><center><u>Mot de passe oublié <span style='color:orange;'>ou</span> pas encore inscrit ?</u></center></html>";
+
 }

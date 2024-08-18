@@ -1,6 +1,6 @@
 package fr.koora.plutonia.launcher;
 
-import fr.koora.plutonia.launcher.utils.JavaVersionUtil;
+import fr.koora.plutonia.launcher.utils.JavaUtils;
 import fr.theshark34.swinger.Swinger;
 
 public class Main {
@@ -9,7 +9,7 @@ public class Main {
 		Swinger.setSystemLookNFeel();
 		Swinger.setResourcePath("/fr/koora/plutonia/launcher/resources");
 
-		System.out.println("Current version of Java : " + JavaVersionUtil.getJavaVersion());
+		System.out.println("Current Java version: " + JavaUtils.getJavaVersion());
 		new Frame();
 	}
 

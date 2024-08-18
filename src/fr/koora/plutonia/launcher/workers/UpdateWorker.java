@@ -55,5 +55,4 @@ public class UpdateWorker {
 	public void interrupt() {
 		this.updateThread.interrupt();
 	}
-
 }
