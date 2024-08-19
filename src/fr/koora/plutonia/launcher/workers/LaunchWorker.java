@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import fr.koora.plutonia.launcher.Frame;
+import fr.koora.plutonia.launcher.Main;
 import fr.koora.plutonia.launcher.managers.SettingsManager;
 import fr.koora.plutonia.launcher.utils.JavaUtils;
 import fr.theshark34.openlauncherlib.LaunchException;
@@ -63,6 +64,7 @@ public class LaunchWorker {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
+			Main.SERVER_WORKER.releaseLock();
 			System.exit(0);
 		}
 	}

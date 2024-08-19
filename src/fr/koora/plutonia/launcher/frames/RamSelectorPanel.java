@@ -35,12 +35,12 @@ public class RamSelectorPanel extends AbstractOptionFrame implements ActionListe
 		this.add(this.ramLabel);
 
 		this.ramBox = new JComboBox<String>(RamSelector.RAM_ARRAY);
-		this.ramBox.setBounds(65, 20, 195, 25);
+		this.ramBox.setBounds(65, 20, 155, 25);
 		this.add(this.ramBox);
 
 		this.confirmButton = new JButton("Confirmer");
 		this.confirmButton.addActionListener(this);
-		this.confirmButton.setBounds(88, 70, 100, 25);
+		this.confirmButton.setBounds(88, 60, 100, 25);
 		this.add(this.confirmButton);
 	}
 

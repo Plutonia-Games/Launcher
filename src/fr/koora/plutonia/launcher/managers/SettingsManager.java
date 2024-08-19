@@ -37,4 +37,6 @@ public class SettingsManager {
 	public static final String HTML_BASE_TEXT = "<html><center>Mot de passe oublié <span style='color:orange;'>ou</span> pas encore inscrit ?</center></html>";
 	public static final String HTML_HOVERED_TEXT = "<html><center><u>Mot de passe oublié <span style='color:orange;'>ou</span> pas encore inscrit ?</u></center></html>";
 
+	public static final int LOCK_PORT = 25465;
+
 }
