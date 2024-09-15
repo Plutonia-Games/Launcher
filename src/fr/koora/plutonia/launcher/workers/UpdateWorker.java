@@ -19,7 +19,7 @@ public class UpdateWorker {
 	private Thread updateThread;
 
 	public void update() throws Exception {
-		SUpdate supdate = new SUpdate(SettingsManager.UPDATE_URL, SettingsManager.GAME_INFOS.getGameDir());
+		SUpdate supdate = new SUpdate(SettingsManager.UPDATE_URL, SettingsManager.GAME_INFOS.getGameDir().toFile());
 		supdate.addApplication(new FileDeleter());
 
 		this.updateThread = new Thread() {

@@ -37,7 +37,6 @@ import fr.theshark34.swinger.event.SwingerEvent;
 import fr.theshark34.swinger.event.SwingerEventListener;
 import fr.theshark34.swinger.textured.STexturedButton;
 import fr.theshark34.swinger.textured.STexturedProgressBar;
-import lombok.Getter;
 
 public class LoginPanel extends JPanel implements SwingerEventListener {
 
@@ -67,21 +66,30 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 		Swinger.getResource("btn_quit_hover.png")
 	);
 
-	@Getter
 	private STexturedProgressBar progressBar = new STexturedProgressBar(
 		Swinger.getResource("progressbar.png"),
 		Swinger.getResource("progressbar_full.png")
 	);
 
-	private Saver saver = new Saver(new File(SettingsManager.GAME_INFOS.getGameDir(), "credentials.yml"));
+	public STexturedProgressBar getProgressBar() {
+		return this.progressBar;
+	}
 
-	@Getter
-	private RamSelector ramSelector = new RamSelector(new File(SettingsManager.GAME_INFOS.getGameDir(), "launcher" + File.separator + "options.yml"));
+	private Saver saver = new Saver(SettingsManager.GAME_INFOS.getGameDir().resolve("credentials.yml"));
+
+	public Saver getSaver() {
+		return this.saver;
+	}
+
+	private RamSelector ramSelector = new RamSelector(SettingsManager.GAME_INFOS.getGameDir().resolve("launcher" + File.separator + "options.yml"));
+
+	public RamSelector getRamSelector() {
+		return this.ramSelector;
+	}
 
 	private Frame frame;
 	private Timer timer;
 
-	@Getter
 	private Font font;
 
 	public LoginPanel(Frame frame) {

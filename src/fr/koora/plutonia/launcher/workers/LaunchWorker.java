@@ -1,6 +1,5 @@
 package fr.koora.plutonia.launcher.workers;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,12 +14,14 @@ import fr.theshark34.openlauncherlib.external.ExternalLauncher;
 import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
 import fr.theshark34.openlauncherlib.minecraft.MinecraftLauncher;
 import fr.theshark34.openlauncherlib.util.ProcessLogManager;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
 public class LaunchWorker {
 
 	private Frame frame;
+
+	public LaunchWorker(Frame frame) {
+		this.frame = frame;
+	}
 
 	public void launch(AuthInfos authInfos) throws LaunchException, InterruptedException {
 		ExternalLaunchProfile launchProfile = MinecraftLauncher.createExternalProfile(SettingsManager.GAME_INFOS, SettingsManager.getGameFolder(), authInfos);
@@ -34,16 +35,22 @@ public class LaunchWorker {
 	}
 
 	private void configureVmArgs(ExternalLaunchProfile launchProfile) {
-		List<String> args = new ArrayList<>(launchProfile.getVmArgs());
+		List<String> vmArgs = new ArrayList<>(launchProfile.getVmArgs());
+		List<String> launchArgs = new ArrayList<>(launchProfile.getArgs());
 
-		args.add("-Djava.net.preferIPv4Stack=true");
-		args.addAll(Arrays.asList(this.frame.getPanel().getRamSelector().getRamArguments()));
+		vmArgs.add("-Djava.net.preferIPv4Stack=true");
+		vmArgs.addAll(Arrays.asList(this.frame.getPanel().getRamSelector().getRamArguments()));
 
-		if (JavaUtils.getJavaVersion() <= 8) {
-			args.add("-Xincgc");
-		}
+		if (JavaUtils.getJavaVersion() <= 8)
+			vmArgs.add("-Xincgc");
 
-		launchProfile.setVmArgs(args);
+		String addons = this.frame.getPanel().getSaver().get("addons");
+
+		if (addons != null && !addons.isEmpty())
+			launchArgs.add("--mods=" + addons);
+
+		launchProfile.setVmArgs(vmArgs);
+		launchProfile.setArgs(launchArgs);
 	}
 
 	private Process startProcess(ExternalLaunchProfile launchProfile) throws LaunchException {
@@ -51,7 +58,7 @@ public class LaunchWorker {
 	}
 
 	private void initLogsProcess(Process process) {
-		ProcessLogManager logManager = new ProcessLogManager(process.getInputStream(), new File(SettingsManager.GAME_INFOS.getGameDir(), "logs.txt"));
+		ProcessLogManager logManager = new ProcessLogManager(process.getInputStream(), SettingsManager.GAME_INFOS.getGameDir().resolve("logs.txt"));
 		logManager.start();
 	}
 
@@ -68,4 +75,5 @@ public class LaunchWorker {
 			System.exit(0);
 		}
 	}
+
 }

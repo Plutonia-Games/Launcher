@@ -8,6 +8,7 @@ import fr.theshark34.swinger.Swinger;
 
 public class Main {
 
+	public static Frame INSTANCE;
 	public static ServerWorker SERVER_WORKER;
 	
 	public static void main(String[] args) {
@@ -28,7 +29,7 @@ public class Main {
 		Swinger.setResourcePath("/fr/koora/plutonia/launcher/resources");
 
 		System.out.println("Current Java version: " + JavaUtils.getJavaVersion());
-		new Frame();
+		INSTANCE = new Frame();
 	}
 
 }

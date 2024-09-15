@@ -28,7 +28,7 @@ public class SettingsManager {
 				bin += File.separator + "silicon";
 		}
 
-		return new GameFolder("assets", "libs", bin, "minecraft.jar");
+		return new GameFolder("assets", "libs", bin, "minecraft.jar", "addons");
 	}
 
 	public static String AUTH_URL = "https://api.plutonia-mc.fr/auth";
