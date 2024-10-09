@@ -18,20 +18,16 @@
  */
 package fr.theshark34.supdate.files;
 
-import static fr.theshark34.supdate.SUpdate.logger;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import fr.theshark34.supdate.BarAPI;
+
+import static fr.theshark34.supdate.SUpdate.logger;
 
 
 /**
@@ -69,60 +65,44 @@ public class DownloadTask implements Runnable {
         this.dest = dest;
     }
 
-    @Override
-    public void run() {
-        // Making the parent folders of the destination file
-        dest.getParentFile().mkdirs();
+	@Override
+	public void run() {
+		dest.getParentFile().mkdirs();
 
-        // Printing a message
-        logger.info("Downloading file %s", fileUrl);
+		logger.info("Downloading file %s", fileUrl);
 
-        HttpURLConnection connection = null;
+		HttpURLConnection connection = null;
+		DataInputStream dis = null;
+		FileOutputStream fos = null;
 
-        try {
-            connection = (HttpURLConnection) fileUrl.openConnection();
-            // Adding some user agents
-            connection.addRequestProperty("User-Agent", "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36");
+		try {
+			connection = (HttpURLConnection) fileUrl.openConnection();
+			connection.addRequestProperty("User-Agent", "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36");
 
-            try (DataInputStream dis = new DataInputStream(connection.getInputStream())) {
-                // Check if the downloaded file is JSON
-                if (fileUrl.toString().endsWith(".json") || fileUrl.toString().endsWith(".xml")) {
-					// Writing the file to the destination
-					try (BufferedWriter bw = new BufferedWriter(new FileWriter(dest))) {
-						InputStreamReader isr = new InputStreamReader(dis);
-						BufferedReader br = new BufferedReader(isr);
-						String line;
-						while ((line = br.readLine()) != null) {
-							bw.write(line);
-							bw.newLine();
-						}
-					}
-				} else {
-                    // If it's not a JSON file, continue downloading and writing it to the destination file
-                    byte[] fileData = new byte[connection.getContentLength()];
-                    int x;
-                    for (x = 0; x < fileData.length; x++) {
-                        BarAPI.incrementNumberOfTotalDownloadedBytes();
-						fileData[x] = dis.readByte();
-					}
+			dis = new DataInputStream(connection.getInputStream());
+			fos = new FileOutputStream(dest);
 
-					// If it's not a JSON file, write it to the destination file
-					try (FileOutputStream fos = new FileOutputStream(dest)) {
-						fos.write(fileData);
-					}
+			byte[] buffer = new byte[4096];
+			int bytesRead;
 
-                    // Incrementing the BarAPI 'numberOfDownloadedFiles' variable
-                    BarAPI.setNumberOfDownloadedFiles(BarAPI.getNumberOfDownloadedFiles() + 1);
-                }
-            }
-        } catch (IOException e) {
-            // If it failed printing a warning message
-            logger.warning("File " + fileUrl + " wasn't downloaded, error: ", e);
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-    }
+			while ((bytesRead = dis.read(buffer)) != -1) {
+				fos.write(buffer, 0, bytesRead);
+				BarAPI.incrementNumberOfTotalDownloadedBytes();
+			}
 
+			BarAPI.setNumberOfDownloadedFiles(BarAPI.getNumberOfDownloadedFiles() + 1);
+		} catch (IOException e) {
+			logger.warning("File " + fileUrl + " wasn't downloaded, error: ", e);
+		} finally {
+			try {
+				if (dis != null)
+					dis.close();
+
+				if (fos != null)
+					fos.close();
+			} catch (IOException ex) {
+				logger.warning("Error closing streams: ", ex);
+			}
+		}
+	}
 }

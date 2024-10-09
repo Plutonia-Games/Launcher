@@ -199,7 +199,7 @@ public class LoginPanel extends JPanel implements SwingerEventListener {
 		this.messageLabel = new JLabel(SettingsManager.HTML_BASE_TEXT);
 		this.messageLabel.setFont(this.getFont().deriveFont(16.0F));
 		this.messageLabel.setForeground(Color.GRAY);
-		this.messageLabel.setBounds(228, 610, 302, 30);
+		this.messageLabel.setBounds(228, 610, 305, 30);
 		this.messageLabel.setCursor(Cursor.getDefaultCursor());
 		this.messageLabel.addMouseListener(new LinkMouseAdapter());
 		this.add(this.messageLabel);

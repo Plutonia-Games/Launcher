@@ -151,7 +151,7 @@ public class Updater {
                 // And stopping
                 return;
             }
-            System.out.println(fileInfos.getFileRelativePath());
+            // System.out.println(fileInfos.getFileRelativePath());
 
             // Sending it to all the applications
             for(Application app : sUpdate.getApplicationManager().getApplications())
